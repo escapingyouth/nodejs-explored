@@ -1,3 +1,4 @@
+// The event loop allows Node to perform non-blocking I/O operations despite the fact that JavaScript is single-threaded
 // Event Loop Sequences:
 // Expired timer callbacks --> I/O polling and callbacks --> setImmediate callbacks --> Close callbacks
 
