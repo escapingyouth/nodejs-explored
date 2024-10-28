@@ -28,7 +28,7 @@ const tourSchema = new mongoose.Schema(
     },
     maxGroupSize: {
       type: Number,
-      rrequire: [true, 'A tour must have a group size'],
+      required: [true, 'A tour must have a group size'],
     },
     difficulty: {
       type: String,
@@ -92,7 +92,7 @@ const tourSchema = new mongoose.Schema(
         default: 'Point',
         enum: ['Point'],
       },
-      coordinates: [Number],
+      coordinates: [Number], // lng first, lat last
       address: String,
       description: String,
     },
@@ -127,6 +127,13 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+// Virtual populate
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
+});
+
 // Types of middleware in mongoose: document, query, aggregate and model
 
 // DOCUMENT MIDDLEWARE: runs before or after .save() and .create() but not on 'insertMany'
@@ -137,6 +144,13 @@ tourSchema.pre('save', function (next) {
 
   next();
 });
+
+// If we were embedding the guides document instead of referencing
+// tourSchema.pre('save', async function(next) {
+//   const guidesPromises = this.guides.map(async id => await User.findById(id));
+//   this.guides = await Promise.all(guidesPromises);
+//   next();
+// });
 
 // tourSchema.pre('save', (next) => {
 //   console.log('Will save document...');
@@ -159,7 +173,7 @@ tourSchema.pre(/^find/, function (next) {
 tourSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'guides',
-    select: '-__v, -passwordChangedAt',
+    select: '-__v -passwordChangedAt',
   });
 
   next();
