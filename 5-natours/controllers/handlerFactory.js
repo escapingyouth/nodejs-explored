@@ -16,6 +16,9 @@ exports.getAll = (Model) =>
       .limitFields()
       .paginate();
 
+    // const doc = await features.query.explain();
+    // explain() is used to get additional statistics about our query
+
     const doc = await features.query;
 
     res.status(200).json({

@@ -52,26 +52,26 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-userSchema.pre('save', async function (next) {
-  /* we only want to encrypt when the password field has been changed
-   and not when other fields like the email field have been changed */
+// userSchema.pre('save', async function (next) {
+//   /* we only want to hash when the password field has been changed
+//    and not when other fields like the email field have been changed */
 
-  if (!this.isModified('password')) return next();
+//   if (!this.isModified('password')) return next();
 
-  // Hash the password wiht a cost of 12
-  this.password = await bcrypt.hash(this.password, 12);
-  this.passwordConfirm = undefined; // won't be persisted in the database
+//   // Hash the password wiht a cost of 12
+//   this.password = await bcrypt.hash(this.password, 12);
+//   this.passwordConfirm = undefined; // won't be persisted in the database
 
-  next();
-});
+//   next();
+// });
 
-userSchema.pre('save', function (next) {
-  if (!this.isModified('password') || this.isNew) {
-    return next();
-  }
-  this.passwordChangedAt = Date.now() - 1000;
-  next();
-});
+// userSchema.pre('save', function (next) {
+//   if (!this.isModified('password') || this.isNew) {
+//     return next();
+//   }
+//   this.passwordChangedAt = Date.now() - 1000;
+//   next();
+// });
 
 userSchema.pre(/^find/, function (next) {
   this.find({ active: { $ne: false } });

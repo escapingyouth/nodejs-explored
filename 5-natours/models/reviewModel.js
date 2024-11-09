@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Tour = require('./tourModel');
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -39,6 +40,42 @@ reviewSchema.pre(/^find/, function (next) {
   // }).populate({ path: 'user', select: 'name photo' });
   this.populate({ path: 'user', select: 'name photo' });
 
+  next();
+});
+
+reviewSchema.statics.calcAverageRatings = async function (tourId) {
+  const stats = await this.aggregate([
+    {
+      $match: { tour: tourId },
+    },
+    {
+      $group: {
+        _id: '$tour',
+        numRating: { $sum: 1 },
+        avgRating: { $avg: '$rating' },
+      },
+    },
+  ]);
+
+  console.log(stats);
+
+  //update tour document with new ratings
+  await Tour.findByIdAndUpdate(tourId, {
+    ratingsQuantity: stats[0].numRating,
+    ratingsAverage: stats[0].avgRating,
+  });
+};
+
+// we use the post middleware instead of pre because the review document hasnt been saved yet with pre
+reviewSchema.post('save', function () {
+  this.constructor.calcAverageRatings(this.tour);
+});
+
+// findByIdAndUpdate
+// findByIdAndDelete
+
+reviewSchema.pre(/^findOneAnd/, async function (next) {
+  const review = await this.findOne();
   next();
 });
 

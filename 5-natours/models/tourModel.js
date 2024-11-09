@@ -122,6 +122,14 @@ const tourSchema = new mongoose.Schema(
   },
 );
 
+// INDEXES -  A database index is a special data structure
+// that allows quick access to specific pieces of information without having to read all data stored
+
+// tourSchema.index({ price: 1 }); // single field index
+tourSchema.index({ price: 1, ratingsAverage: -1 }); // compound index
+
+tourSchema.index({ slug: 1 });
+
 // VIRTUAL PROPERTIES - Virtuals are document properties that do not persist or get stored in the MongoDB database
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
